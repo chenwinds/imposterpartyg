@@ -1,0 +1,418 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Imposter Party Game - Play Free Online Word Game with Friends</title>
+  <meta name="description" content="Play the Imposter Party Game online for free. A hilarious pass-and-play word game for 3-10 friends: describe your secret word, spot the imposter, and vote them out. No app, no signup.">
+  <link rel="canonical" href="https://imposterpartyg.com/">
+  <meta property="og:title" content="Imposter Party Game - Play Free Online">
+  <meta property="og:description" content="Describe your secret word. Find the imposter. Free party word game for 3-10 players, no download needed.">
+  <meta property="og:url" content="https://imposterpartyg.com/">
+  <meta property="og:type" content="website">
+  <style>
+    :root {
+      --bg: #0f1226;
+      --card: #1a1f3d;
+      --accent: #ff5d73;
+      --accent2: #4ecdc4;
+      --text: #eef0ff;
+      --muted: #a3a8c9;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      line-height: 1.6;
+    }
+    a { color: var(--accent2); }
+    header {
+      padding: 16px 24px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 8px;
+      border-bottom: 1px solid rgba(255,255,255,0.08);
+    }
+    .logo { font-weight: 800; font-size: 1.15rem; color: var(--text); text-decoration: none; }
+    .logo span { color: var(--accent); }
+    nav a { color: var(--muted); text-decoration: none; margin-left: 16px; font-size: 0.95rem; }
+    nav a:hover { color: var(--text); }
+    main { max-width: 860px; margin: 0 auto; padding: 24px 16px 64px; }
+    h1 { font-size: 1.9rem; line-height: 1.25; margin: 16px 0 8px; }
+    h2 { font-size: 1.4rem; margin: 40px 0 12px; }
+    .tagline { color: var(--muted); margin-bottom: 24px; }
+
+    .game-card {
+      background: var(--card);
+      border-radius: 16px;
+      padding: 28px 20px;
+      text-align: center;
+      box-shadow: 0 8px 30px rgba(0,0,0,0.35);
+    }
+    .game-card h2 { margin-top: 0; }
+    .btn {
+      display: inline-block;
+      background: var(--accent);
+      color: #fff;
+      border: none;
+      border-radius: 10px;
+      padding: 14px 28px;
+      font-size: 1.05rem;
+      font-weight: 700;
+      cursor: pointer;
+      margin: 8px 4px;
+      text-decoration: none;
+    }
+    .btn:hover { filter: brightness(1.1); }
+    .btn.secondary { background: transparent; border: 2px solid var(--accent2); color: var(--accent2); }
+    .btn:disabled { opacity: 0.5; cursor: not-allowed; }
+    .row { margin: 14px 0; }
+    label { display: block; color: var(--muted); font-size: 0.9rem; margin-bottom: 6px; }
+    select, input[type="number"] {
+      width: 100%;
+      max-width: 320px;
+      padding: 12px;
+      border-radius: 8px;
+      border: 1px solid rgba(255,255,255,0.15);
+      background: #12152e;
+      color: var(--text);
+      font-size: 1rem;
+    }
+    .hidden { display: none; }
+    .big-word {
+      font-size: 2rem;
+      font-weight: 800;
+      color: var(--accent2);
+      margin: 18px 0;
+      word-break: break-word;
+    }
+    .imposter-word { color: var(--accent); }
+    .hint { color: var(--muted); font-size: 0.9rem; margin-top: 10px; }
+    .player-badge {
+      display: inline-block;
+      background: #12152e;
+      border-radius: 999px;
+      padding: 6px 16px;
+      margin-bottom: 10px;
+      font-weight: 700;
+    }
+
+    section p { margin-bottom: 12px; color: #cfd3f0; }
+    section ul, section ol { margin: 0 0 12px 22px; color: #cfd3f0; }
+    .faq-item { margin-bottom: 18px; }
+    .faq-item h3 { font-size: 1.05rem; margin-bottom: 4px; }
+    .categories-list li { margin-bottom: 4px; }
+
+    footer {
+      border-top: 1px solid rgba(255,255,255,0.08);
+      padding: 24px 16px;
+      text-align: center;
+      color: var(--muted);
+      font-size: 0.9rem;
+    }
+    footer a { color: var(--muted); margin: 0 8px; }
+  </style>
+</head>
+<body>
+  <header>
+    <a class="logo" href="/">Imposter<span>PartyG</span></a>
+    <nav>
+      <a href="/">Play</a>
+      <a href="/about.html">About</a>
+      <a href="/contact.html">Contact</a>
+    </nav>
+  </header>
+
+  <main>
+    <h1>Imposter Party Game - Play Free Online</h1>
+    <p class="tagline">The viral pass-and-play word game. Describe your secret word, catch the imposter, no app required.</p>
+
+    <!-- ============ GAME ============ -->
+    <div class="game-card" id="game">
+
+      <!-- Setup screen -->
+      <div id="screen-setup">
+        <h2>Game Setup</h2>
+        <div class="row">
+          <label for="playerCount">Number of players (3-10)</label>
+          <input type="number" id="playerCount" min="3" max="10" value="5">
+        </div>
+        <div class="row">
+          <label for="category">Word category</label>
+          <select id="category">
+            <option value="random">Random (all categories)</option>
+            <option value="food">Food &amp; Drink</option>
+            <option value="animals">Animals</option>
+            <option value="places">Places</option>
+            <option value="objects">Everyday Objects</option>
+            <option value="sports">Sports &amp; Hobbies</option>
+          </select>
+        </div>
+        <div class="row">
+          <label for="imposterCount">Number of imposters</label>
+          <select id="imposterCount">
+            <option value="1">1 imposter</option>
+            <option value="2">2 imposters (6+ players)</option>
+          </select>
+        </div>
+        <button class="btn" onclick="startGame()">Start Game</button>
+        <p class="hint">One phone, everyone plays. Pass the device around to reveal secret words.</p>
+      </div>
+
+      <!-- Pass device screen -->
+      <div id="screen-pass" class="hidden">
+        <div class="player-badge" id="passLabel">Player 1</div>
+        <h2>Pass the device to <span id="passName"></span></h2>
+        <p class="hint">Make sure nobody else can see the screen!</p>
+        <button class="btn" onclick="revealWord()">I am <span id="passName2"></span> - Reveal my word</button>
+      </div>
+
+      <!-- Reveal word screen -->
+      <div id="screen-reveal" class="hidden">
+        <div class="player-badge" id="revealLabel"></div>
+        <p>Your secret word is:</p>
+        <div class="big-word" id="wordDisplay"></div>
+        <p class="hint" id="roleHint"></p>
+        <button class="btn" onclick="hideWord()">Got it - Hide &amp; Pass</button>
+      </div>
+
+      <!-- Discussion screen -->
+      <div id="screen-discuss" class="hidden">
+        <h2>Discussion Time!</h2>
+        <p>Going around the group, each player says <strong>one short clue</strong> about their word.</p>
+        <p>The imposter must blend in without knowing the real word!</p>
+        <p class="hint">After everyone has spoken, discuss and vote on who the imposter is.</p>
+        <button class="btn" onclick="showVote()">We voted - Reveal the Imposter</button>
+      </div>
+
+      <!-- Result screen -->
+      <div id="screen-result" class="hidden">
+        <h2>The imposter was...</h2>
+        <div class="big-word imposter-word" id="imposterReveal"></div>
+        <p>The civilian word was <strong id="civilianWord"></strong> and the imposter's word was <strong id="imposterWord"></strong>.</p>
+        <button class="btn" onclick="playAgain()">Play Again</button>
+        <button class="btn secondary" onclick="backToSetup()">Change Settings</button>
+      </div>
+
+    </div>
+
+    <!-- ============ CONTENT ============ -->
+    <section id="about">
+      <h2>About the Imposter Party Game</h2>
+      <p>The Imposter Party Game (also known as "Who is the Spy" or the viral TikTok imposter challenge) is a social deduction word game you can play with 3 to 10 friends using a single phone. No downloads, no accounts, no setup - just open this page and start playing in under a minute.</p>
+      <p>Here is how it works: at the start of each round, every player secretly receives the same word - except one player, the <strong>imposter</strong>, who receives a slightly different but related word. For example, everyone might get <em>Apple</em> while the imposter gets <em>Pear</em>. Players then take turns giving one short clue about their word, without saying the word itself. The imposter must listen carefully and improvise clues to avoid detection, while everyone else tries to spot the clue that doesn't quite fit.</p>
+      <p>After everyone has spoken, the group discusses and votes on who they think the imposter is. If the majority catches the imposter, the civilians win. If the imposter survives the vote or correctly guesses the civilian word, the imposter wins the round.</p>
+      <p>The game became a massive TikTok trend in 2025 because it creates hilarious moments: a player confidently describing their word while everyone else realizes the clues don't add up. It works for family gatherings, classroom icebreakers, road trips, and parties - anyone who can describe a word can play, and rounds take only five minutes.</p>
+    </section>
+
+    <section id="how-to-play">
+      <h2>How to Play</h2>
+      <ol>
+        <li><strong>Set up:</strong> Choose the number of players (3-10) and a word category, then press Start.</li>
+        <li><strong>Pass and reveal:</strong> Pass the phone around. Each player privately taps to see their secret word, then hides it and passes the phone on.</li>
+        <li><strong>Give clues:</strong> Starting with Player 1, each person says one short clue about their word out loud. Don't say the word itself!</li>
+        <li><strong>Discuss:</strong> After a round of clues, talk it out. Whose clue sounded suspicious? Who hesitated?</li>
+        <li><strong>Vote:</strong> Point at your suspect on the count of three. The player with the most votes is eliminated - tap the button above to reveal whether you caught the imposter.</li>
+      </ol>
+      <p><strong>Tips for civilians:</strong> Give clues that are specific enough to prove you know the word, but vague enough that the imposter can't guess it. <strong>Tips for the imposter:</strong> Speak late if you can, mirror the group's vibe, and keep your clue generic.</p>
+    </section>
+
+    <section id="categories">
+      <h2>Word Categories</h2>
+      <ul class="categories-list">
+        <li><strong>Food &amp; Drink:</strong> Coffee vs. Tea, Burger vs. Sandwich, Sushi vs. Sashimi...</li>
+        <li><strong>Animals:</strong> Cat vs. Tiger, Dolphin vs. Shark, Bee vs. Wasp...</li>
+        <li><strong>Places:</strong> Beach vs. Island, Library vs. Bookstore, Hospital vs. Clinic...</li>
+        <li><strong>Everyday Objects:</strong> Umbrella vs. Parasol, Pillow vs. Cushion, Pen vs. Pencil...</li>
+        <li><strong>Sports &amp; Hobbies:</strong> Soccer vs. Football, Swimming vs. Diving, Chess vs. Checkers...</li>
+      </ul>
+      <p>Choose "Random" for the full mixed word bank - over 100 tricky word pairs designed to make even confident players sweat.</p>
+    </section>
+
+    <section id="faq">
+      <h2>FAQ</h2>
+      <div class="faq-item">
+        <h3>Is the Imposter Party Game free to play?</h3>
+        <p>Yes, completely free. There is nothing to download and no account to create - the game runs entirely in your browser.</p>
+      </div>
+      <div class="faq-item">
+        <h3>Can I play on mobile?</h3>
+        <p>Absolutely. The game is designed for phones - that's the whole point of pass-and-play. It also works on tablets and desktop browsers.</p>
+      </div>
+      <div class="faq-item">
+        <h3>How many players do I need?</h3>
+        <p>Three players is the minimum (two civilians and one imposter), but the game shines with 5-8 players. With 6 or more players you can add a second imposter for extra chaos.</p>
+      </div>
+      <div class="faq-item">
+        <h3>Is this the same as the TikTok imposter game?</h3>
+        <p>Yes - it's the viral "guess the imposter" word challenge you have seen on TikTok, playable instantly without an app. It's also known as "Who is the Spy" or "Undercover" in some countries.</p>
+      </div>
+      <div class="faq-item">
+        <h3>Do I need an internet connection?</h3>
+        <p>You need internet to load the page, but once loaded a full round can be played offline since everything runs on your device.</p>
+      </div>
+    </section>
+  </main>
+
+  <footer>
+    <p>&copy; 2026 ImposterPartyG.com - Free online party games</p>
+    <p>
+      <a href="/privacy.html">Privacy Policy</a> |
+      <a href="/about.html">About</a> |
+      <a href="/contact.html">Contact</a>
+    </p>
+  </footer>
+
+  <script>
+    var WORD_BANK = {
+      food: [
+        ["Coffee","Tea"],["Burger","Sandwich"],["Sushi","Sashimi"],["Pizza","Flatbread"],
+        ["Milk","Cream"],["Apple","Pear"],["Banana","Plantain"],["Orange","Tangerine"],
+        ["Chocolate","Fudge"],["Ice Cream","Sorbet"],["Pasta","Noodles"],["Rice","Quinoa"],
+        ["Beer","Cider"],["Wine","Champagne"],["Cake","Pie"],["Cookie","Biscuit"],
+        ["Lemon","Lime"],["Strawberry","Raspberry"],["Pancake","Waffle"],["Soup","Stew"],
+        ["Steak","Roast Beef"],["Chicken","Turkey"],["Hot Dog","Sausage"],["Butter","Margarine"]
+      ],
+      animals: [
+        ["Cat","Tiger"],["Dog","Wolf"],["Dolphin","Shark"],["Bee","Wasp"],
+        ["Horse","Donkey"],["Lion","Leopard"],["Rabbit","Hare"],["Frog","Toad"],
+        ["Eagle","Hawk"],["Penguin","Puffin"],["Snake","Eel"],["Turtle","Tortoise"],
+        ["Monkey","Gorilla"],["Sheep","Goat"],["Mouse","Rat"],["Whale","Dolphin"],
+        ["Butterfly","Moth"],["Spider","Scorpion"],["Crocodile","Alligator"],["Owl","Falcon"]
+      ],
+      places: [
+        ["Beach","Island"],["Library","Bookstore"],["Hospital","Clinic"],["Airport","Train Station"],
+        ["Cinema","Theater"],["Museum","Gallery"],["Park","Garden"],["Hotel","Hostel"],
+        ["Restaurant","Cafe"],["School","University"],["Gym","Stadium"],["Church","Temple"],
+        ["Desert","Savanna"],["Mountain","Hill"],["River","Canal"],["Zoo","Safari Park"],
+        ["Mall","Market"],["Castle","Palace"],["Farm","Ranch"],["Harbor","Marina"]
+      ],
+      objects: [
+        ["Umbrella","Parasol"],["Pillow","Cushion"],["Pen","Pencil"],["Watch","Clock"],
+        ["Chair","Stool"],["Table","Desk"],["Shoes","Sneakers"],["Hat","Cap"],
+        ["Mirror","Window"],["Key","Keycard"],["Bag","Backpack"],["Wallet","Purse"],
+        ["Phone","Tablet"],["Camera","Camcorder"],["Candle","Flashlight"],["Blanket","Quilt"],
+        ["Knife","Dagger"],["Bottle","Flask"],["Glasses","Sunglasses"],["Broom","Mop"]
+      ],
+      sports: [
+        ["Soccer","Football"],["Swimming","Diving"],["Chess","Checkers"],["Tennis","Badminton"],
+        ["Basketball","Volleyball"],["Running","Jogging"],["Skiing","Snowboarding"],["Boxing","Wrestling"],
+        ["Golf","Mini Golf"],["Baseball","Cricket"],["Cycling","Mountain Biking"],["Yoga","Pilates"],
+        ["Surfing","Skateboarding"],["Hiking","Trekking"],["Fishing","Hunting"],["Dancing","Ballet"],
+        ["Karate","Judo"],["Rowing","Kayaking"],["Archery","Shooting"],["Gymnastics","Acrobatics"]
+      ]
+    };
+
+    var state = {
+      players: 5,
+      imposters: 1,
+      category: "random",
+      civilianWord: "",
+      imposterWord: "",
+      imposterIndexes: [],
+      currentPlayer: 0
+    };
+
+    function show(id) {
+      ["screen-setup","screen-pass","screen-reveal","screen-discuss","screen-result"].forEach(function(s) {
+        document.getElementById(s).classList.add("hidden");
+      });
+      document.getElementById(id).classList.remove("hidden");
+    }
+
+    function pickWords() {
+      var cats = state.category === "random"
+        ? Object.keys(WORD_BANK)
+        : [state.category];
+      var cat = cats[Math.floor(Math.random() * cats.length)];
+      var pairs = WORD_BANK[cat];
+      var pair = pairs[Math.floor(Math.random() * pairs.length)];
+      if (Math.random() < 0.5) {
+        state.civilianWord = pair[0];
+        state.imposterWord = pair[1];
+      } else {
+        state.civilianWord = pair[1];
+        state.imposterWord = pair[0];
+      }
+    }
+
+    function pickImposters() {
+      state.imposterIndexes = [];
+      while (state.imposterIndexes.length < state.imposters) {
+        var i = Math.floor(Math.random() * state.players);
+        if (state.imposterIndexes.indexOf(i) === -1) state.imposterIndexes.push(i);
+      }
+    }
+
+    function startGame() {
+      var p = parseInt(document.getElementById("playerCount").value, 10);
+      if (isNaN(p) || p < 3) p = 3;
+      if (p > 10) p = 10;
+      state.players = p;
+      state.imposters = parseInt(document.getElementById("imposterCount").value, 10);
+      if (state.imposters === 2 && p < 6) state.imposters = 1;
+      state.category = document.getElementById("category").value;
+      state.currentPlayer = 0;
+      pickWords();
+      pickImposters();
+      showPass();
+    }
+
+    function showPass() {
+      var n = state.currentPlayer + 1;
+      document.getElementById("passLabel").textContent = "Player " + n + " of " + state.players;
+      document.getElementById("passName").textContent = "Player " + n;
+      document.getElementById("passName2").textContent = "Player " + n;
+      show("screen-pass");
+    }
+
+    function revealWord() {
+      var isImposter = state.imposterIndexes.indexOf(state.currentPlayer) !== -1;
+      var wordEl = document.getElementById("wordDisplay");
+      var n = state.currentPlayer + 1;
+      document.getElementById("revealLabel").textContent = "Player " + n;
+      if (isImposter) {
+        wordEl.textContent = state.imposterWord;
+        wordEl.classList.add("imposter-word");
+        document.getElementById("roleHint").textContent = "Remember your word. Blend in.";
+      } else {
+        wordEl.textContent = state.civilianWord;
+        wordEl.classList.remove("imposter-word");
+        document.getElementById("roleHint").textContent = "Remember your word. Describe it without saying it.";
+      }
+      show("screen-reveal");
+    }
+
+    function hideWord() {
+      state.currentPlayer++;
+      if (state.currentPlayer >= state.players) {
+        show("screen-discuss");
+      } else {
+        showPass();
+      }
+    }
+
+    function showVote() {
+      var names = state.imposterIndexes.map(function(i) { return "Player " + (i + 1); });
+      document.getElementById("imposterReveal").textContent = names.join(" & ");
+      document.getElementById("civilianWord").textContent = state.civilianWord;
+      document.getElementById("imposterWord").textContent = state.imposterWord;
+      show("screen-result");
+    }
+
+    function playAgain() {
+      state.currentPlayer = 0;
+      pickWords();
+      pickImposters();
+      showPass();
+    }
+
+    function backToSetup() {
+      show("screen-setup");
+    }
+  </script>
+</body>
+</html>
