@@ -182,16 +182,32 @@
 
       <!-- Discussion screen -->
       <div id="screen-discuss" class="hidden">
-        <h2>Discussion Time!</h2>
+        <h2 id="discussTitle">Discussion Time!</h2>
         <p>Going around the group, each player says <strong>one short clue</strong> about their word.</p>
         <p>The imposter must blend in without knowing the real word!</p>
-        <p class="hint">After everyone has spoken, discuss and vote on who the imposter is.</p>
-        <button class="btn" onclick="showVote()">We voted - Reveal the Imposter</button>
+        <p class="hint" id="discussHint">After everyone has spoken, discuss and vote on who the imposter is.</p>
+        <button class="btn" onclick="showVote()">Start Voting</button>
+      </div>
+
+      <!-- Vote screen -->
+      <div id="screen-vote" class="hidden">
+        <h2>Vote!</h2>
+        <p>Point at your suspect on the count of three, then tap the player with the most votes:</p>
+        <div id="voteButtons"></div>
+        <p class="hint">Ties? Revote between the tied players before tapping.</p>
+      </div>
+
+      <!-- Elimination screen -->
+      <div id="screen-elim" class="hidden">
+        <h2 id="elimTitle"></h2>
+        <p id="elimDetail"></p>
+        <p class="hint" id="elimHint"></p>
+        <button class="btn" onclick="continueRound()">Continue - Next Round of Clues</button>
       </div>
 
       <!-- Result screen -->
       <div id="screen-result" class="hidden">
-        <h2>The imposter was...</h2>
+        <h2 id="resultTitle">The imposter was...</h2>
         <div class="big-word imposter-word" id="imposterReveal"></div>
         <p>The civilian word was <strong id="civilianWord"></strong> and the imposter's word was <strong id="imposterWord"></strong>.</p>
         <button class="btn" onclick="playAgain()">Play Again</button>
@@ -205,7 +221,7 @@
       <h2>About the Imposter Party Game</h2>
       <p>The Imposter Party Game (also known as "Who is the Spy" or the viral TikTok imposter challenge) is a social deduction word game you can play with 3 to 10 friends using a single phone. No downloads, no accounts, no setup - just open this page and start playing in under a minute.</p>
       <p>Here is how it works: at the start of each round, every player secretly receives the same word - except one player, the <strong>imposter</strong>, who receives a slightly different but related word. For example, everyone might get <em>Apple</em> while the imposter gets <em>Pear</em>. Players then take turns giving one short clue about their word, without saying the word itself. The imposter must listen carefully and improvise clues to avoid detection, while everyone else tries to spot the clue that doesn't quite fit.</p>
-      <p>After everyone has spoken, the group discusses and votes on who they think the imposter is. If the majority catches the imposter, the civilians win. If the imposter survives the vote or correctly guesses the civilian word, the imposter wins the round.</p>
+      <p>After everyone has spoken, the group discusses and votes out a suspect. If the vote catches an imposter, great - but if a civilian is wrongly voted out, they're eliminated and the game continues with another round of clues and voting. The civilians win by voting out every imposter; the imposters win once their number matches the remaining civilians (or by correctly guessing the civilian word).</p>
       <p>The game became a massive TikTok trend in 2025 because it creates hilarious moments: a player confidently describing their word while everyone else realizes the clues don't add up. It works for family gatherings, classroom icebreakers, road trips, and parties - anyone who can describe a word can play, and rounds take only five minutes. We have played it with sleepy friends at 1 a.m. and with kids at birthday parties; it lands every time.</p>
       <p>Looking for ideas? Browse our <a href="/imposter-game-words">full imposter word list</a>, read the <a href="/how-to-play-imposter-game">complete rules and variants</a>, or steal some <a href="/imposter-game-questions">clue ideas and discussion questions</a>.</p>
     </section>
@@ -217,7 +233,7 @@
         <li><strong>Pass and reveal:</strong> Pass the phone around. Each player privately taps to see their secret word, then hides it and passes the phone on.</li>
         <li><strong>Give clues:</strong> Starting with Player 1, each person says one short clue about their word out loud. Don't say the word itself!</li>
         <li><strong>Discuss:</strong> After a round of clues, talk it out. Whose clue sounded suspicious? Who hesitated?</li>
-        <li><strong>Vote:</strong> Point at your suspect on the count of three. The player with the most votes is eliminated - tap the button above to reveal whether you caught the imposter.</li>
+        <li><strong>Vote:</strong> Point at your suspect on the count of three, then tap the player with the most votes in the game. If you caught an imposter - nice. If you voted out a civilian, they're out and the game continues: another round of clues, then another vote. <strong>Civilians win</strong> by voting out every imposter; <strong>imposters win</strong> once they match the number of remaining civilians.</li>
       </ol>
       <p><strong>Tips for civilians:</strong> Give clues that are specific enough to prove you know the word, but vague enough that the imposter can't guess it. <strong>Tips for the imposter:</strong> Speak late if you can, mirror the group's vibe, and keep your clue generic.</p>
     </section>
@@ -318,11 +334,12 @@
       civilianWord: "",
       imposterWord: "",
       imposterIndexes: [],
-      currentPlayer: 0
+      currentPlayer: 0,
+      alive: []
     };
 
     function show(id) {
-      ["screen-setup","screen-pass","screen-reveal","screen-discuss","screen-result"].forEach(function(s) {
+      ["screen-setup","screen-pass","screen-reveal","screen-discuss","screen-vote","screen-elim","screen-result"].forEach(function(s) {
         document.getElementById(s).classList.add("hidden");
       });
       document.getElementById(id).classList.remove("hidden");
@@ -361,6 +378,8 @@
       if (state.imposters === 2 && p < 6) state.imposters = 1;
       state.category = document.getElementById("category").value;
       state.currentPlayer = 0;
+      state.alive = [];
+      for (var i = 0; i < state.players; i++) state.alive.push(true);
       pickWords();
       pickImposters();
       showPass();
@@ -394,14 +413,81 @@
     function hideWord() {
       state.currentPlayer++;
       if (state.currentPlayer >= state.players) {
+        document.getElementById("discussTitle").textContent = "Discussion Time!";
+        document.getElementById("discussHint").textContent = "After everyone has spoken, discuss and vote on who the imposter is.";
         show("screen-discuss");
       } else {
         showPass();
       }
     }
 
+    function aliveCounts() {
+      var c = 0, imp = 0;
+      for (var i = 0; i < state.players; i++) {
+        if (!state.alive[i]) continue;
+        if (state.imposterIndexes.indexOf(i) !== -1) imp++; else c++;
+      }
+      return { civilians: c, imposters: imp };
+    }
+
     function showVote() {
+      var box = document.getElementById("voteButtons");
+      box.innerHTML = "";
+      for (var i = 0; i < state.players; i++) {
+        if (!state.alive[i]) continue;
+        (function(idx) {
+          var b = document.createElement("button");
+          b.className = "btn secondary";
+          b.textContent = "Player " + (idx + 1);
+          b.onclick = function() { eliminate(idx); };
+          box.appendChild(b);
+        })(i);
+      }
+      show("screen-vote");
+    }
+
+    function eliminate(idx) {
+      state.alive[idx] = false;
+      var wasImposter = state.imposterIndexes.indexOf(idx) !== -1;
+      var counts = aliveCounts();
+
+      if (wasImposter && counts.imposters === 0) {
+        endGame(true);
+        return;
+      }
+      if (counts.imposters >= counts.civilians) {
+        endGame(false);
+        return;
+      }
+
+      var title = document.getElementById("elimTitle");
+      var detail = document.getElementById("elimDetail");
+      var hint = document.getElementById("elimHint");
+      if (wasImposter) {
+        title.textContent = "Player " + (idx + 1) + " was an imposter!";
+        detail.textContent = "Nice catch - but " + counts.imposters + " imposter" + (counts.imposters > 1 ? " is" : "s are") + " still hiding among you.";
+        hint.textContent = counts.civilians + " civilians and " + counts.imposters + " imposter(s) remain.";
+      } else {
+        title.textContent = "Player " + (idx + 1) + " was a civilian...";
+        detail.textContent = "Ouch. You voted out an innocent player. The imposter is still among you.";
+        hint.textContent = counts.civilians + " civilians and " + counts.imposters + " imposter(s) remain - give another round of clues.";
+      }
+      show("screen-elim");
+    }
+
+    function continueRound() {
+      var counts = aliveCounts();
+      document.getElementById("discussTitle").textContent = "Discussion Time - Round Continues!";
+      document.getElementById("discussHint").textContent =
+        counts.civilians + " civilians and " + counts.imposters + " imposter(s) left. Everyone still in the game gives one new clue, then vote again.";
+      show("screen-discuss");
+    }
+
+    function endGame(civiliansWin) {
       var names = state.imposterIndexes.map(function(i) { return "Player " + (i + 1); });
+      document.getElementById("resultTitle").textContent = civiliansWin
+        ? "Civilians win! The imposter was..."
+        : "Imposters win! They were...";
       document.getElementById("imposterReveal").textContent = names.join(" & ");
       document.getElementById("civilianWord").textContent = state.civilianWord;
       document.getElementById("imposterWord").textContent = state.imposterWord;
@@ -410,6 +496,8 @@
 
     function playAgain() {
       state.currentPlayer = 0;
+      state.alive = [];
+      for (var i = 0; i < state.players; i++) state.alive.push(true);
       pickWords();
       pickImposters();
       showPass();
