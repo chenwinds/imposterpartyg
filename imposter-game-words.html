@@ -4,8 +4,8 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-1032381108569032" crossorigin="anonymous"></script>
-  <title>Imposter Game Words - 100+ Word Pairs for Your Next Round</title>
-  <meta name="description" content="The best imposter game words and word pairs for your party. Browse 100+ tricky civilian-vs-imposter word pairs by category, or play instantly in your browser.">
+  <title>Imposter Game Words Generator - 100+ Random Word Pairs</title>
+  <meta name="description" content="Free imposter game words generator: get a random civilian-vs-imposter word pair by category and difficulty in one click. Browse 100+ tricky word pairs, or play instantly in your browser.">
   <link rel="canonical" href="https://imposterpartyg.com/imposter-game-words">
   <style>
     :root { --bg:#0f1226; --card:#1a1f3d; --accent:#ff5d73; --accent2:#4ecdc4; --text:#eef0ff; --muted:#a3a8c9; }
@@ -29,6 +29,19 @@
     .cta:hover { filter:brightness(1.1); }
     footer { border-top:1px solid rgba(255,255,255,0.08); padding:24px 16px; text-align:center; color:var(--muted); font-size:0.9rem; }
     footer a { color:var(--muted); margin:0 8px; }
+    .generator { background:var(--card); border-radius:14px; padding:24px 20px; margin:20px 0 8px; }
+    .generator .controls { display:flex; gap:12px; flex-wrap:wrap; align-items:center; margin-bottom:16px; }
+    .generator select { background:var(--bg); color:var(--text); border:1px solid rgba(255,255,255,0.15); border-radius:8px; padding:10px 12px; font-size:0.95rem; }
+    .gen-btn { background:var(--accent); color:#fff; border:none; border-radius:8px; padding:11px 22px; font-weight:700; font-size:0.95rem; cursor:pointer; }
+    .gen-btn:hover { filter:brightness(1.1); }
+    .gen-result { display:none; background:var(--bg); border-radius:10px; padding:20px; text-align:center; }
+    .gen-result.show { display:block; }
+    .gen-words { font-size:1.5rem; font-weight:800; margin:8px 0 4px; }
+    .gen-words .vs { color:var(--muted); font-size:1rem; font-weight:400; margin:0 10px; }
+    .gen-diff { display:inline-block; font-size:0.8rem; color:var(--muted); border:1px solid rgba(255,255,255,0.15); border-radius:20px; padding:3px 12px; margin-bottom:12px; }
+    .gen-actions { margin-top:12px; display:flex; gap:10px; justify-content:center; }
+    .copy-btn { background:transparent; color:var(--accent2); border:1px solid var(--accent2); border-radius:8px; padding:9px 18px; font-size:0.9rem; cursor:pointer; }
+    .copy-btn:hover { background:rgba(78,205,196,0.1); }
   </style>
 </head>
 <body>
@@ -42,8 +55,113 @@
   </header>
 
   <main>
-    <h1>Imposter Game Words: 100+ Word Pairs for Your Next Round</h1>
-    <p>The secret to a great imposter round isn't the players - it's the word pair. Too similar and nobody can tell the imposter apart. Too different and the imposter gets caught in thirty seconds. Below are the word pairs we use in our own <a href="/">free online imposter game</a>, organized by category and rated by how evil they are.</p>
+    <h1>Imposter Game Words Generator: 100+ Random Word Pairs</h1>
+    <p>The secret to a great imposter round isn't the players - it's the word pair. Too similar and nobody can tell the imposter apart. Too different and the imposter gets caught in thirty seconds. Use the generator below to get a random pair instantly, or browse all the word pairs we use in our own <a href="/">free online imposter game</a>, organized by category and rated by how evil they are.</p>
+
+    <div class="generator" id="generator">
+      <h2 style="margin-top:0;">Random word pair generator</h2>
+      <p>Pick a category and difficulty, hit generate, and read the pair out loud - civilians get the first word, the imposter gets the second.</p>
+      <div class="controls">
+        <select id="genCategory">
+          <option value="all">All categories</option>
+          <option value="food">Food &amp; Drink</option>
+          <option value="animals">Animals</option>
+          <option value="places">Places</option>
+          <option value="objects">Everyday Objects</option>
+          <option value="sports">Sports &amp; Hobbies</option>
+          <option value="tech">Tech &amp; Internet</option>
+        </select>
+        <select id="genDifficulty">
+          <option value="all">Any difficulty</option>
+          <option value="Easy">Easy</option>
+          <option value="Medium">Medium</option>
+          <option value="Evil">Evil</option>
+        </select>
+        <button class="gen-btn" onclick="generatePair()">Generate word pair</button>
+      </div>
+      <div class="gen-result" id="genResult">
+        <div class="gen-diff" id="genDiff"></div>
+        <div class="gen-words"><span id="genCiv"></span><span class="vs">vs</span><span id="genImp"></span></div>
+        <p style="margin:0;">Civilian word: <strong id="genCivLabel"></strong> &middot; Imposter word: <strong id="genImpLabel"></strong></p>
+        <div class="gen-actions">
+          <button class="copy-btn" onclick="copyPair()">Copy pair</button>
+          <button class="gen-btn" onclick="generatePair()">Generate another</button>
+        </div>
+      </div>
+    </div>
+
+    <script>
+      const WORD_PAIRS = [
+        {c:"Coffee",i:"Tea",d:"Easy",cat:"food"},
+        {c:"Burger",i:"Sandwich",d:"Easy",cat:"food"},
+        {c:"Sushi",i:"Sashimi",d:"Evil",cat:"food"},
+        {c:"Ice Cream",i:"Sorbet",d:"Medium",cat:"food"},
+        {c:"Pancake",i:"Waffle",d:"Medium",cat:"food"},
+        {c:"Wine",i:"Champagne",d:"Evil",cat:"food"},
+        {c:"Strawberry",i:"Raspberry",d:"Medium",cat:"food"},
+        {c:"Butter",i:"Margarine",d:"Evil",cat:"food"},
+        {c:"Cat",i:"Tiger",d:"Medium",cat:"animals"},
+        {c:"Dog",i:"Wolf",d:"Medium",cat:"animals"},
+        {c:"Dolphin",i:"Shark",d:"Easy",cat:"animals"},
+        {c:"Bee",i:"Wasp",d:"Evil",cat:"animals"},
+        {c:"Rabbit",i:"Hare",d:"Evil",cat:"animals"},
+        {c:"Frog",i:"Toad",d:"Evil",cat:"animals"},
+        {c:"Turtle",i:"Tortoise",d:"Evil",cat:"animals"},
+        {c:"Crocodile",i:"Alligator",d:"Evil",cat:"animals"},
+        {c:"Beach",i:"Island",d:"Easy",cat:"places"},
+        {c:"Library",i:"Bookstore",d:"Medium",cat:"places"},
+        {c:"Hospital",i:"Clinic",d:"Medium",cat:"places"},
+        {c:"Cinema",i:"Theater",d:"Medium",cat:"places"},
+        {c:"Hotel",i:"Hostel",d:"Easy",cat:"places"},
+        {c:"Castle",i:"Palace",d:"Evil",cat:"places"},
+        {c:"Pen",i:"Pencil",d:"Easy",cat:"objects"},
+        {c:"Pillow",i:"Cushion",d:"Medium",cat:"objects"},
+        {c:"Watch",i:"Clock",d:"Easy",cat:"objects"},
+        {c:"Glasses",i:"Sunglasses",d:"Medium",cat:"objects"},
+        {c:"Broom",i:"Mop",d:"Easy",cat:"objects"},
+        {c:"Blanket",i:"Quilt",d:"Evil",cat:"objects"},
+        {c:"Soccer",i:"Football",d:"Medium",cat:"sports"},
+        {c:"Tennis",i:"Badminton",d:"Easy",cat:"sports"},
+        {c:"Chess",i:"Checkers",d:"Medium",cat:"sports"},
+        {c:"Skiing",i:"Snowboarding",d:"Medium",cat:"sports"},
+        {c:"Yoga",i:"Pilates",d:"Evil",cat:"sports"},
+        {c:"Karate",i:"Judo",d:"Evil",cat:"sports"},
+        {c:"iPhone",i:"Android phone",d:"Medium",cat:"tech"},
+        {c:"Netflix",i:"YouTube",d:"Easy",cat:"tech"},
+        {c:"Spotify",i:"Apple Music",d:"Evil",cat:"tech"},
+        {c:"PlayStation",i:"Xbox",d:"Medium",cat:"tech"},
+        {c:"Google",i:"Bing",d:"Easy",cat:"tech"},
+        {c:"TikTok",i:"Instagram Reels",d:"Evil",cat:"tech"},
+        {c:"Uber",i:"Lyft",d:"Evil",cat:"tech"},
+        {c:"Laptop",i:"Tablet",d:"Medium",cat:"tech"}
+      ];
+      let currentPair = null;
+      function generatePair() {
+        const cat = document.getElementById('genCategory').value;
+        const diff = document.getElementById('genDifficulty').value;
+        let pool = WORD_PAIRS.filter(p =>
+          (cat === 'all' || p.cat === cat) && (diff === 'all' || p.d === diff)
+        );
+        if (!pool.length) return;
+        if (pool.length > 1 && currentPair) pool = pool.filter(p => p !== currentPair);
+        currentPair = pool[Math.floor(Math.random() * pool.length)];
+        document.getElementById('genCiv').textContent = currentPair.c;
+        document.getElementById('genImp').textContent = currentPair.i;
+        document.getElementById('genCivLabel').textContent = currentPair.c;
+        document.getElementById('genImpLabel').textContent = currentPair.i;
+        document.getElementById('genDiff').textContent = currentPair.d + ' difficulty';
+        document.getElementById('genResult').classList.add('show');
+      }
+      function copyPair() {
+        if (!currentPair) return;
+        const text = 'Imposter game word pair: ' + currentPair.c + ' (civilians) vs ' + currentPair.i + ' (imposter) - ' + currentPair.d;
+        navigator.clipboard.writeText(text).then(() => {
+          const btn = document.querySelector('.copy-btn');
+          btn.textContent = 'Copied!';
+          setTimeout(() => btn.textContent = 'Copy pair', 1500);
+        });
+      }
+    </script>
 
     <h2>What makes a good imposter word pair?</h2>
     <p>The best pairs live in the sweet spot: same category, different specifics. <em>Coffee</em> vs <em>Tea</em> works because both are hot morning drinks - clues like "caffeine" or "mug" fit either word. But <em>Coffee</em> vs <em>Bicycle</em> would be a disaster; the imposter is exposed on the first clue.</p>
